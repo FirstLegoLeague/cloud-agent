@@ -1,0 +1,9 @@
+{
+  "name": "@first-lego-league/cloud-agent",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/FirstLegoLeague/cloud-agent.git",
+  "author": "Roy Shmueli <2903801+2roy999@users.noreply.github.com>",
+  "license": "GPL-3.0",
+  "private": true
+}
