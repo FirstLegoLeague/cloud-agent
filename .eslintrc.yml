@@ -1,0 +1,3 @@
+extends:
+  - first-lego-league
+  - first-lego-league/jsx
