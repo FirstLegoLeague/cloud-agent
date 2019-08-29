@@ -1,0 +1,7 @@
+api: "1.0"
+name: "cloud-agent"
+display: Timer
+type: node
+script: ./src/index.js
+config:
+

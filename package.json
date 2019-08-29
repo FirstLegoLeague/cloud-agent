@@ -7,24 +7,30 @@
   "license": "GPL-3.0",
   "private": true,
   "scripts": {
-    "start": "webpack-dev-server --mode development --config webpack.dev.js"
+    "start": "concurrently -k \"yarnpm start:be\" \"yarnpm start:ui\"",
+    "start:be": "devl --port 8080",
+    "start:ui": "webpack-dev-server --mode development --config webpack.dev.js --port 3001"
   },
   "dependencies": {
     "@first-lego-league/ms-auth": "^1.4.1",
     "@first-lego-league/ms-client": "^1.0.3",
     "@first-lego-league/ms-correlation": "^1.0.1",
     "@first-lego-league/ms-logger": "^2.0.0",
+    "axios": "^0.19.0",
     "bluebird": "^3.5.5",
     "fastify": "^2.7.0",
-    "mhub": "^2.0.0"
+    "mhub": "^2.0.0",
+    "moment": "^2.24.0"
   },
   "devDependencies": {
     "@babel/core": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
+    "@first-lego-league/dev-launcher": "^0.3.0",
     "@first-lego-league/user-interface": "^2.1.0",
     "babel-loader": "^8.0.6",
     "clean-webpack-plugin": "^3.0.0",
+    "concurrently": "^4.1.2",
     "css-loader": "^3.1.0",
     "eslint": "^6.1.0",
     "eslint-config-first-lego-league": "^1.0.1",
@@ -43,6 +49,7 @@
     "webpack": "^4.38.0",
     "webpack-cli": "^3.3.6",
     "webpack-dev-server": "^3.7.2",
-    "webpack-merge": "^4.2.1"
+    "webpack-merge": "^4.2.1",
+    "yarnpm": "^0.0.5"
   }
 }
