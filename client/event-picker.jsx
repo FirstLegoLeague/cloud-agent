@@ -9,6 +9,7 @@ export default class EventPicker extends Component {
     super(props)
 
     this.state = {
+      error: null,
       event: null,
       eventKey: null
     }
