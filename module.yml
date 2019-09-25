@@ -3,5 +3,6 @@ name: "cloud-agent"
 display: Timer
 type: node
 script: ./src/index.js
+require:
+  - mongodb
 config:
-

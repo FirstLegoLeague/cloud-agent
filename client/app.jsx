@@ -28,7 +28,7 @@ export default class App extends Component {
 
   onApproval (eventKey) {
     this.setState({ status: 'loading' })
-    axios.post('/api/event/current')
+    axios.post('/api/event/current', eventKey)
       .then(() => {
         this.setState({ status: 'dashboard' })
       })

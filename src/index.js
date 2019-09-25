@@ -1,48 +1,27 @@
-
+const Promise = require('bluebird')
 const fastify = require('fastify')
+const { MongoClient } = require('mongodb')
 
-const app = fastify()
+const { CloudConnector } = require('./cloud-connector')
+const { EventManager } = require('./event-manager')
+const routes = require('./routes')
 
-app.get('/api/event/5d3c54f650237573a7b2a4b3', (request, response) => {
-  response.send({
-    name: 'Event 1',
-    startTime: new Date().toString(),
-    endTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toString(),
-    city: 'Tel-Aviv',
-    region: 'Israel',
-    country: 'Israel'
-  })
+const options = {}
+
+const mongoUri = process.env.MONGO_URI
+const mongoPromise = MongoClient.connect(mongoUri, {
+  promiseLibrary: Promise,
+  useNewUrlParser: true,
+  useUnifiedTopology: true
 })
 
-app.get('/api/event/current', (request, response) => {
-  response.send({
-    name: 'Event 1',
-    startTime: new Date().toString(),
-    endTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toString(),
-    city: 'Tel-Aviv',
-    region: 'Israel',
-    country: 'Israel'
-  })
-})
+options.db = mongoPromise.then(client => client.db())
+options.cloudConnector = new CloudConnector(options)
+options.eventManager = new EventManager(options)
 
-app.head('/api/event/current', (request, response) => {
-  response.status(404).send()
-})
+const app = options.app = fastify()
 
-app.post('/api/event/current', (request, response) => {
-  response.send({})
-})
-
-app.get('/api/status', (request, response) => {
-  response.send({
-    online: true,
-    pending: 3
-  })
-})
-
-app.post('/api/event/close', (request, response) => {
-  response.send({})
-})
+routes.configure(options)
 
 app.listen(process.env.PORT, (err, address) => {
   if (err) {
