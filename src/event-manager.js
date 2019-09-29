@@ -3,8 +3,10 @@ const Promise = require('bluebird')
 const COLLECTION_NAME = 'events'
 
 exports.EventManager = class {
-  constructor ({ db: dbPromise, cloudConnector }) {
+  constructor ({ db: dbPromise, cloudConnector, tournamentConnector, scoringConnector }) {
     this._cloudConnector = cloudConnector
+    this._tournamentConnector = tournamentConnector
+    this._scoringConnector = scoringConnector
     this._collectionPromise = dbPromise
       .then(db => db.createCollection(COLLECTION_NAME))
       .tap(collection => collection.createIndexes([
@@ -52,7 +54,13 @@ exports.EventManager = class {
   }
 
   closeCurrentEvent () {
-    return this._collectionPromise
+    return Promise.all([
+      this.getCurrentEvent(),
+      this._tournamentConnector.getTeams(),
+      this._scoringConnector.getScores()
+    ])
+      .then(([event, teams, scores]) => this._cloudConnector.sendClosingMessage(event, teams, scores))
+      .then(() => this._collectionPromise)
       .then(collection => collection.updateMany({ current: true }, { $set: { current: false } }))
   }
 }

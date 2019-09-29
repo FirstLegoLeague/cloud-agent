@@ -7,9 +7,10 @@
   "license": "GPL-3.0",
   "private": true,
   "scripts": {
-    "start": "concurrently -k \"yarnpm start:be\" \"yarnpm start:ui\"",
-    "start:be": "devl --port 8080",
-    "start:ui": "webpack-dev-server --mode development --config webpack.dev.js --port 3001"
+    "start": "concurrently -k \"yarnpm start:be\" \"yarnpm start:ui\" \"yarnpm start:dummy\"",
+    "start:be": "devl -s tournament=http://localhost:3002 -s scoring=http://localhost:3002 --port 8080",
+    "start:ui": "webpack-dev-server --mode development --config webpack.dev.js --port 3001",
+    "start:dummy": "cross-env PORT=3002 node ./dummy/index.js"
   },
   "dependencies": {
     "@first-lego-league/ms-auth": "^1.4.1",
@@ -32,6 +33,7 @@
     "babel-loader": "^8.0.6",
     "clean-webpack-plugin": "^3.0.0",
     "concurrently": "^4.1.2",
+    "cross-env": "^6.0.0",
     "css-loader": "^3.1.0",
     "eslint": "^6.1.0",
     "eslint-config-first-lego-league": "^1.0.1",
@@ -40,6 +42,7 @@
     "eslint-plugin-node": "^9.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.0",
+    "faker": "^4.1.0",
     "file-loader": "^4.1.0",
     "html-webpack-plugin": "^3.2.0",
     "react": "^16.8.6",

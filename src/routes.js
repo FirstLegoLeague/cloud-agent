@@ -69,13 +69,13 @@ exports.configure = ({ app, cloudConnector, eventManager }) => {
   })
 
   app.post('/api/event/close', (request, reply) => {
-    eventManager.closeCurrentEvent()
+    return eventManager.closeCurrentEvent()
       .then(() => reply.send())
       .catch(err => {
-        if (err.code === 'NOT_FOUND') {
-          reply.status(404).send()
+        if (err.code !== 'NOT_FOUND') {
+          throw err
         } else {
-          reply.status(500).send(err.toString())
+          reply.status(404).send()
         }
       })
   })
