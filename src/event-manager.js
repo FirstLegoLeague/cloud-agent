@@ -13,18 +13,23 @@ exports.EventManager = class {
         { key: { current: 1 } },
         { key: { cloudId: 1 }, unique: true }
       ]))
+    this._currentEvent = null
   }
 
   getCurrentEvent () {
-    return this._collectionPromise
-      .then(collection => collection.findOne({ current: true }))
-      .then(event => {
-        if (event == null) {
-          throw Object.assign(new Error(), { code: 'NOT_FOUND' })
-        } else {
-          return event
-        }
-      })
+    if (this._currentEvent == null) {
+      return this._collectionPromise
+        .then(collection => collection.findOne({ current: true }))
+        .tap(event => {
+          if (event == null) {
+            throw Object.assign(new Error(), { code: 'NOT_FOUND' })
+          } else {
+            this._currentEvent = event
+          }
+        })
+    } else {
+      return Promise.resolve(this._currentEvent)
+    }
   }
 
   setCurrentEvent (eventId, token) {
@@ -51,6 +56,8 @@ exports.EventManager = class {
           { upsert: true }
         )
       })
+      .tap(() => { this._currentEvent = null })
+      .then(() => this.updateEventData())
   }
 
   closeCurrentEvent () {
@@ -62,5 +69,22 @@ exports.EventManager = class {
       .then(([event, teams, scores]) => this._cloudConnector.sendClosingMessage(event, teams, scores))
       .then(() => this._collectionPromise)
       .then(collection => collection.updateMany({ current: true }, { $set: { current: false } }))
+      .tap(() => { this._currentEvent = null })
+  }
+
+  updateEventData () {
+    const eventPromise = this.getCurrentEvent()
+
+    Promise.all([eventPromise, this._tournamentConnector.getTeams()])
+      .then(([event, teams]) => {
+        return teams.map(team => this._cloudConnector.sendTeamMessage(event, team))
+      })
+      .all()
+
+    Promise.all([eventPromise, this._scoringConnector.getScores()])
+      .then(([event, scores]) => {
+        return scores.map(score => this._cloudConnector.sendScoreMessage(event, score))
+      })
+      .all()
   }
 }

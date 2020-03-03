@@ -1,6 +1,6 @@
 api: "1.0"
 name: "cloud-agent"
-display: Timer
+display: Cloud Agent
 type: node
 script: ./src/index.js
 require:

@@ -1,4 +1,5 @@
 const Promise = require('bluebird')
+const _ = require('lodash')
 
 exports.CloudConnector = class {
   constructor ({ logger }) {
@@ -34,12 +35,13 @@ exports.CloudConnector = class {
     return this._sendEventMessage(event, 'closing', { teams, scores })
   }
 
-  sendScoreMessage (event, match, score) {
-    return this._sendEventMessage(event, 'score', {
-      team: match.team.number,
-      stage: match.stage,
-      round: match.round,
-      score: score.points
-    })
+  sendScoreMessage (event, score) {
+    return this._sendEventMessage(event, 'score',
+      _.pick(score, ['teamNumber', 'stage', 'round', 'score', 'published']))
+  }
+
+  sendTeamMessage (event, team) {
+    return this._sendEventMessage(event, 'team',
+      _.pick(team, ['number', 'name', 'affiliation', 'cityState', 'country']))
   }
 }

@@ -7,7 +7,14 @@ exports.TournamentConnector = class {
   }
 
   getTeams () {
-    return axios.get(this._tournamentUrl + '/team/all')
+    return axios.get(`${this._tournamentUrl}/team/all`)
+      .then(response => {
+        return response.data
+      })
+  }
+
+  getTeamById (id) {
+    return axios.get(`${this._tournamentUrl}/team/${id}`)
       .then(response => {
         return response.data
       })

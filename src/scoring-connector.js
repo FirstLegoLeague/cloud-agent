@@ -7,7 +7,14 @@ exports.ScoringConnector = class {
   }
 
   getScores () {
-    return axios.get(this._scoringUrl + '/scores/public')
+    return axios.get(`${this._scoringUrl}/scores/public`)
+      .then(response => {
+        return response.data
+      })
+  }
+
+  getScoreById (id) {
+    return axios.get(`${this._scoringUrl}/scores/${id}`)
       .then(response => {
         return response.data
       })
