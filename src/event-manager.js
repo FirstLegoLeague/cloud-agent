@@ -80,11 +80,17 @@ exports.EventManager = class {
         return teams.map(team => this._cloudConnector.sendTeamMessage(event, team))
       })
       .all()
+      .catch(err => {
+        this._logger.error(err.toString())
+      })
 
     Promise.all([eventPromise, this._scoringConnector.getScores()])
       .then(([event, scores]) => {
         return scores.map(score => this._cloudConnector.sendScoreMessage(event, score))
       })
       .all()
+      .catch(err => {
+        this._logger.error(err.toString())
+      })
   }
 }
