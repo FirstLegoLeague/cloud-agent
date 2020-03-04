@@ -1,34 +1,29 @@
-const Promise = require('bluebird')
 const _ = require('lodash')
+const axios = require('axios')
 
 exports.CloudConnector = class {
-  constructor ({ logger }) {
+  constructor ({ logger, config }) {
     this._logger = logger
+    this._cloudUrl = config.cloudUrl
   }
 
-  getEventInfo (eventId) {
-    if (eventId === '5d8b0b4551a48b135ec4b4a5') {
-      return Promise.resolve({
-        _id: '5d8b0b4551a48b135ec4b4a5',
-        name: 'Event 1',
-        startTime: new Date().toString(),
-        endTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toString(),
-        city: 'Tel-Aviv',
-        region: 'Israel',
-        country: 'Israel'
+  getEventInfo (eventId, token) {
+    return axios.get(`${this._cloudUrl}/api/agent/event/${eventId}`, {
+      headers: { 'X-Auth-Token': token }
+    })
+      .then(response => {
+        return response.data
       })
-    } else {
-      return Promise.reject(Object.assign(new Error(), { code: 'NOT_FOUND' }))
-    }
   }
 
   _sendEventMessage (event, type, body) {
-    if (event.token.endsWith('gqru4-65GOaqtUiDrCe3bP5Cr74VeD_JCBOxccB3pFI')) {
-      this._logger.info(`Sending ${type} message: ${JSON.stringify(body)}`)
-      return Promise.resolve()
-    } else {
-      return Promise.reject(new Error('Unauthorized Cloud Access'))
-    }
+    return axios.post(`${this._cloudUrl}/api/agent/event/${event.cloudId}/message`, {
+      timestamp: Date.now(),
+      type,
+      body
+    }, {
+      headers: { 'X-Auth-Token': event.token }
+    })
   }
 
   sendClosingMessage (event, teams, scores) {

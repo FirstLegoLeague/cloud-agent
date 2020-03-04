@@ -12,7 +12,7 @@ function transformEvent (event) {
 
 exports.configure = ({ app, cloudConnector, eventManager }) => {
   app.get('/api/event/:eventId', (request, reply) => {
-    cloudConnector.getEventInfo(request.params.eventId)
+    cloudConnector.getEventInfo(request.params.eventId, request.headers['x-auth-token'])
       .then(event => {
         reply.send(transformEvent(event))
       })

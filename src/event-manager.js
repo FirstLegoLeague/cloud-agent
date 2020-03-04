@@ -3,7 +3,8 @@ const Promise = require('bluebird')
 const COLLECTION_NAME = 'events'
 
 exports.EventManager = class {
-  constructor ({ db: dbPromise, cloudConnector, tournamentConnector, scoringConnector }) {
+  constructor ({ db: dbPromise, cloudConnector, logger, tournamentConnector, scoringConnector }) {
+    this._logger = logger
     this._cloudConnector = cloudConnector
     this._tournamentConnector = tournamentConnector
     this._scoringConnector = scoringConnector
@@ -35,7 +36,7 @@ exports.EventManager = class {
   setCurrentEvent (eventId, token) {
     return Promise.all([
       this._collectionPromise,
-      this._cloudConnector.getEventInfo(eventId)
+      this._cloudConnector.getEventInfo(eventId, token)
     ])
       .then(([collection, cloudEventInfo]) => {
         return collection.updateOne(
@@ -81,7 +82,11 @@ exports.EventManager = class {
       })
       .all()
       .catch(err => {
-        this._logger.error(err.toString())
+        if (err.code === 'NOT_FOUND') {
+          return
+        }
+
+        this._logger.error(err.stack.toString())
       })
 
     Promise.all([eventPromise, this._scoringConnector.getScores()])
@@ -90,7 +95,11 @@ exports.EventManager = class {
       })
       .all()
       .catch(err => {
-        this._logger.error(err.toString())
+        if (err.code === 'NOT_FOUND') {
+          return
+        }
+
+        this._logger.error(err.stack.toString())
       })
   }
 }

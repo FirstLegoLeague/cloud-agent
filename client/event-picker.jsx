@@ -24,7 +24,11 @@ export default class EventPicker extends Component {
       })
 
       setImmediate(() => {
-        axios.get(`/api/event/${eventKey.event}`)
+        axios.get(`/api/event/${eventKey.event}`, {
+          headers: {
+            'X-Auth-Token': eventKey.jwt
+          }
+        })
           .then(response => {
             this.setState({
               eventKey: eventKey,

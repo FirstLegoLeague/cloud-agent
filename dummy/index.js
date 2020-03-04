@@ -82,15 +82,31 @@ function generateScores () {
     .reduce((arr, addition) => arr.concat(addition), [])
 }
 
+function generateEvent () {
+  return {
+    _id: fakeMongoId(),
+    name: faker.commerce.productName(),
+    startTime: faker.date.future().toString(),
+    endTime: faker.date.future().toString(),
+    city: faker.address.city(),
+    region: faker.address.state(),
+    country: faker.address.country(),
+    key: faker.random.alphaNumeric(32)
+  }
+}
+
 const readFile = Promise.promisify(fs.readFile)
 const writeFile = Promise.promisify(fs.writeFile)
 const mkdirpAsync = Promise.promisify(mkdirp)
 
 const TEAMS_FILE = path.resolve('./data/dummy/teams.json')
 const SCORES_FILE = path.resolve('./data/dummy/scores.json')
+const EVENT_FILE = path.resolve('./data/dummy/event.json')
+const EVENT_KEY_FILE = path.resolve('./data/dummy/event-key.json')
 
 let teams = []
 let scores = []
+let event = null
 
 readFile(TEAMS_FILE)
   .then(JSON.parse)
@@ -116,6 +132,21 @@ readFile(TEAMS_FILE)
     return mkdirpAsync(path.dirname(SCORES_FILE))
       .then(() => writeFile(SCORES_FILE, JSON.stringify(scores)))
   })
+
+readFile(EVENT_FILE)
+  .then(JSON.parse)
+  .then(eventFromFile => { event = eventFromFile })
+  .catch(err => {
+    if (err.code === 'ENOENT') {
+      event = generateEvent()
+      return mkdirpAsync(path.dirname(EVENT_FILE))
+        .then(() => writeFile(EVENT_FILE, JSON.stringify(event)))
+    } else {
+      throw err
+    }
+  })
+  .then(() => writeFile(EVENT_KEY_FILE, JSON.stringify({ event: event._id, jwt: event.key })))
+  .catch(err => { throw err })
 
 const app = fastify()
 
@@ -168,36 +199,28 @@ app.post('/fake/score', (request, reply) => {
     .then(() => reply.send())
     .catch(err => reply.status(500).send(err))
 })
-// app.get('/api/event/current', (request, response) => {
-//   response.send({
-//     name: 'Event 1',
-//     startTime: new Date().toString(),
-//     endTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toString(),
-//     city: 'Tel-Aviv',
-//     region: 'Israel',
-//     country: 'Israel'
-//   })
-// })
-//
-// app.head('/api/event/current', (request, response) => {
-//   response.status(404).send()
-// })
-//
-// app.post('/api/event/current', (request, response) => {
-//   response.send({})
-// })
-//
-// app.get('/api/status', (request, response) => {
-//   response.send({
-//     online: true,
-//     pending: 3
-//   })
-// })
-//
-// app.post('/api/event/close', (request, response) => {
-//   response.send({})
-// })
-//
+
+app.get('/api/agent/event/:id', (request, reply) => {
+  if (event.key !== request.headers['x-auth-token']) {
+    reply.status(401).send()
+  } else if (event._id === request.params.id) {
+    reply.send(event)
+  } else {
+    reply.status(404).send()
+  }
+})
+
+app.post('/api/agent/event/:id/message', (request, reply) => {
+  if (event.key !== request.headers['x-auth-token']) {
+    reply.status(401).send()
+  } else if (event._id !== request.params.id) {
+    reply.status(404).send()
+  } else {
+    console.log('cloud message: ', request.body)
+    reply.send()
+  }
+})
+
 app.listen(process.env.PORT, (err, address) => {
   if (err) {
     app.log.error(err)
