@@ -18,7 +18,7 @@ exports.CloudConnector = class {
 
   _sendEventMessage (event, type, body) {
     return axios.post(`${this._cloudUrl}/api/agent/event/${event.cloudId}/message`, {
-      timestamp: Date.now(),
+      localTimestamp: Date.now(),
       type,
       body
     }, {
@@ -32,11 +32,11 @@ exports.CloudConnector = class {
 
   sendScoreMessage (event, score) {
     return this._sendEventMessage(event, 'score',
-      _.pick(score, ['teamNumber', 'stage', 'round', 'score', 'published']))
+      _.pick(score, ['_id', 'teamNumber', 'stage', 'round', 'score', 'published']))
   }
 
   sendTeamMessage (event, team) {
     return this._sendEventMessage(event, 'team',
-      _.pick(team, ['number', 'name', 'affiliation', 'cityState', 'country']))
+      _.pick(team, ['_id', 'number', 'name', 'affiliation', 'cityState', 'country']))
   }
 }

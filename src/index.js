@@ -11,10 +11,12 @@ const routes = require('./routes')
 const { ScoringConnector } = require('./scoring-connector')
 const { TournamentConnector } = require('./tournament-connector')
 
+const { cloudUrl } = require('../cloud-url.json')
+
 const options = {
   logger: new Logger(),
   config: {
-    cloudUrl: process.env.CLOUD_URL || 'http://localhost:3002',
+    cloudUrl: cloudUrl || 'http://localhost:3002',
     tournamentUrl: process.env.MODULE_TOURNAMENT_URL,
     scoringUrl: process.env.MODULE_SCORING_URL,
     mhubUri: process.env.MHUB_URI,

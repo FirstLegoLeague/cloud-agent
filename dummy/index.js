@@ -2,9 +2,10 @@ const Promise = require('bluebird')
 const faker = require('faker')
 const fastify = require('fastify')
 const fs = require('fs')
-const mkdirp = require('mkdirp')
-const path = require('path')
 const { MClient } = require('mhub')
+const mkdirp = require('mkdirp')
+const { ObjectId } = require('mongodb')
+const path = require('path')
 
 const MHUB_CLIENT_ID = 'cloud-dummy'
 
@@ -21,7 +22,7 @@ const mhubLogin = () => {
 }
 
 function fakeMongoId () {
-  return new Array(6).fill().map(() => faker.random.number(65536).toString(16)).join('')
+  return new ObjectId()
 }
 
 function generateTeams () {
@@ -216,7 +217,7 @@ app.post('/api/agent/event/:id/message', (request, reply) => {
   } else if (event._id !== request.params.id) {
     reply.status(404).send()
   } else {
-    console.log('cloud message: ', request.body)
+    console.log('cloud message: ', JSON.stringify(request.body))
     reply.send()
   }
 })
